@@ -62,17 +62,27 @@ If any rebase fails (conflicts), report the failure and **STOP** — do not laun
 
 ### 6. Launch Terminal.app sessions
 
+#### 6a. Determine the model
+
+Select the Claude model based on the prompt template content:
+- If the prompt contains `/speckit.implement` → use `--model claude-sonnet-4-6` (Sonnet 4.6 — optimized for high-throughput code generation)
+- For all other speckit commands (`/speckit.analyze`, `/speckit.plan`, `/speckit.specify`, `/speckit.tasks`, `/speckit.clarify`, etc.) → use `--model claude-opus-4-6` (Opus 4.6 — optimized for deep reasoning and analysis)
+
+Display the selected model to the user in the wave details output.
+
+#### 6b. Open Terminal.app windows
+
 For each spec in the wave, open a new Terminal.app window using AppleScript. The window should:
 
 1. `cd` to the worktree directory
-2. Run `claude --dangerously-skip-permissions '<prompt>'` where `<prompt>` is the template with `{specs_dir}` replaced by the plan's `specs_dir` value and `{spec}` replaced by the spec name.
+2. Run `claude --model {model} --dangerously-skip-permissions '<prompt>'` where `{model}` is the model determined in step 6a, `<prompt>` is the template with `{specs_dir}` replaced by the plan's `specs_dir` value and `{spec}` replaced by the spec name.
 
 Use this AppleScript pattern for each spec (run via `osascript -e`):
 
 ```applescript
 tell application "Terminal"
     activate
-    do script "cd \"{worktree_dir}\" && claude --dangerously-skip-permissions '{prompt}'"
+    do script "cd \"{worktree_dir}\" && claude --model {model} --dangerously-skip-permissions '{prompt}'"
     set custom title of front window to "{spec}"
 end tell
 ```
